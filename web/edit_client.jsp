@@ -56,6 +56,9 @@
                         <c:when test="${param['message'] == 'passpordIdMatch'}">
                             <p class="text-danger">Пользователь с таким идентификационным номером паспорта уже существует</p>
                         </c:when>
+                        <c:when test="${param['message'] == 'invalidData'}">
+                            <p class="text-danger">Введены некорректные данные</p>
+                        </c:when>
                     </c:choose>
 
                 </c:if>
@@ -64,7 +67,8 @@
 
                 <form class="form-horizontal" action="/controller" method="post">
 
-                    <input type="hidden" name="command" value="createClient">
+                    <input type="hidden" name="command" value="updateClient">
+                    <input type="hidden" name="clientId" value="${client.idClient}">
 
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="firstName">* Фамилия:</label>

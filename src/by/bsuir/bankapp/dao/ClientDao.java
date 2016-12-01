@@ -16,7 +16,8 @@ public class ClientDao implements GenericDao<Integer, Client> {
 
     private static final ClientDao instance = new ClientDao();
 
-    private ClientDao() {}
+    private ClientDao() {
+    }
 
     public static ClientDao getInstance() {
         return instance;
@@ -27,7 +28,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
         Client client = null;
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from bank_app.client where idclient = ?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM bank_app.client WHERE idclient = ?")) {
             statement.setInt(1, key);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -57,11 +58,13 @@ public class ClientDao implements GenericDao<Integer, Client> {
             e.printStackTrace();
         }
 
-        client.setIlls(readIllsOfClient(client.getIdClient()));
-        client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
-        client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
-        client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        if (client != null) {
+            client.setIlls(readIllsOfClient(client.getIdClient()));
+            client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
+            client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
+            client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
 
+        }
         return client;
     }
 
@@ -70,7 +73,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
         Client client = null;
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from bank_app.client where passportNumber = ?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM bank_app.client WHERE passportNumber = ?")) {
             statement.setString(1, passport);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -99,12 +102,12 @@ public class ClientDao implements GenericDao<Integer, Client> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        client.setIlls(readIllsOfClient(client.getIdClient()));
-        client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
-        client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
-        client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
-
+        if (client != null) {
+            client.setIlls(readIllsOfClient(client.getIdClient()));
+            client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
+            client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
+            client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        }
         return client;
     }
 
@@ -112,7 +115,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
         Client client = null;
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from bank_app.client where secname = ? AND  name=? AND client.surname=?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM bank_app.client WHERE secname = ? AND  name=? AND surname=?")) {
             statement.setString(1, secName);
             statement.setString(2, name);
             statement.setString(3, surname);
@@ -144,10 +147,12 @@ public class ClientDao implements GenericDao<Integer, Client> {
             e.printStackTrace();
         }
 
-        client.setIlls(readIllsOfClient(client.getIdClient()));
-        client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
-        client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
-        client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        if (client != null) {
+            client.setIlls(readIllsOfClient(client.getIdClient()));
+            client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
+            client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
+            client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        }
 
         return client;
     }
@@ -156,7 +161,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
         Client client = null;
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from bank_app.client where passportId = ?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM bank_app.client WHERE passportId = ?")) {
             statement.setString(1, passportId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -186,10 +191,12 @@ public class ClientDao implements GenericDao<Integer, Client> {
             e.printStackTrace();
         }
 
-        client.setIlls(readIllsOfClient(client.getIdClient()));
-        client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
-        client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
-        client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        if (client != null) {
+            client.setIlls(readIllsOfClient(client.getIdClient()));
+            client.setNationalities(readNationalitiesOfClient(client.getIdClient()));
+            client.setFamilyMembers(readFamilyMembersOfClient(client.getIdClient()));
+            client.setLivingCities(readLivingCitiesOfClient(client.getIdClient()));
+        }
 
         return client;
     }
@@ -197,8 +204,8 @@ public class ClientDao implements GenericDao<Integer, Client> {
     public List<String> readFamilyMembersOfClient(int clientId) {
         List<String> familyMembers = new ArrayList<>();
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
-        try(Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT bank_app.family_stat.family_member FROM bank_app.family_stat WHERE clientId=?")) {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT bank_app.family_stat.family_member FROM bank_app.family_stat WHERE clientId=?")) {
             statement.setInt(1, clientId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -215,8 +222,8 @@ public class ClientDao implements GenericDao<Integer, Client> {
     public List<String> readLivingCitiesOfClient(int clientId) {
         List<String> livingCities = new ArrayList<>();
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
-        try(Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT bank_app.city_living.city_name FROM bank_app.city_living WHERE clientId=?")) {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT bank_app.city_living.city_name FROM bank_app.city_living WHERE clientId=?")) {
             statement.setInt(1, clientId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -233,8 +240,8 @@ public class ClientDao implements GenericDao<Integer, Client> {
     public List<String> readNationalitiesOfClient(int clientId) {
         List<String> nationalities = new ArrayList<>();
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
-        try(Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT bank_app.nationality.nationality FROM bank_app.nationality WHERE clientId=?")) {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT bank_app.nationality.nationality FROM bank_app.nationality WHERE clientId=?")) {
             statement.setInt(1, clientId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -251,8 +258,8 @@ public class ClientDao implements GenericDao<Integer, Client> {
     public List<String> readIllsOfClient(int clientId) {
         List<String> ills = new ArrayList<>();
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
-        try(Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT bank_app.ills.illName FROM bank_app.ills WHERE clientId=?")) {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT bank_app.ills.illName FROM bank_app.ills WHERE clientId=?")) {
             statement.setInt(1, clientId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -268,14 +275,120 @@ public class ClientDao implements GenericDao<Integer, Client> {
 
     @Override
     public void update(Client obj) {
+        IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE bank_app.client SET secname=?, name=?, surname=?, birthday=?, sex=?, passportSeries=?, passportNumber=?, passportPlace=?," +
+                             "passportDate=?, passportId=?, birthPlace=?, address=?, homePhone=?, phone=?, `e-mail`=?, pensioner=?, income=?, military=? " +
+                             "WHERE client.idclient = ?"
+             )) {
 
+            statement.setString(1, obj.getSecName());
+            statement.setString(2, obj.getName());
+            statement.setString(3, obj.getSurName());
+            statement.setDate(4, obj.getBirthday());
+            statement.setBoolean(5, obj.isSex());
+            statement.setString(6, obj.getPassportSeries());
+            statement.setString(7, obj.getPassportNumber());
+            statement.setString(8, obj.getPassportPlace());
+            statement.setDate(9, obj.getPassportDate());
+            statement.setString(10, obj.getPassportId());
+            statement.setString(11, obj.getBirthPlace());
+            statement.setString(12, obj.getAddress());
+            statement.setString(13, obj.getHomePhone());
+            statement.setString(14, obj.getPhone());
+            statement.setString(15, obj.getEmail());
+            statement.setBoolean(16, obj.isPensioner());
+            statement.setInt(17, obj.getIncome());
+            statement.setBoolean(18, obj.isMilitary());
+            statement.setInt(19, obj.getIdClient());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try (Connection connection = connectionPool.getConnection();
+            PreparedStatement statement = connection.prepareStatement("DELETE  FROM bank_app.nationality WHERE bank_app.nationality.clientId = ?")) {
+            statement.setInt(1, obj.getIdClient());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("DELETE  FROM bank_app.ills WHERE bank_app.ills.clientId = ?")) {
+            statement.setInt(1, obj.getIdClient());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("DELETE  FROM bank_app.city_living WHERE bank_app.city_living.clientId = ?")) {
+            statement.setInt(1, obj.getIdClient());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("DELETE  FROM bank_app.family_stat WHERE bank_app.family_stat.clientId = ?")) {
+            statement.setInt(1, obj.getIdClient());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        for (String familyMember : obj.getFamilyMembers()) {
+            try (Connection connection1 = connectionPool.getConnection();
+                 PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.family_stat (clientId, family_member) VALUES (?, ?)")) {
+                statement1.setInt(1, obj.getIdClient());
+                statement1.setString(2, familyMember);
+                statement1.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (String ill : obj.getIlls()) {
+            try (Connection connection1 = connectionPool.getConnection();
+                 PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.ills (clientId, illName) VALUES (?, ?)")) {
+                statement1.setInt(1, obj.getIdClient());
+                statement1.setString(2, ill);
+                statement1.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (String nationality : obj.getNationalities()) {
+            try (Connection connection1 = connectionPool.getConnection();
+                 PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.nationality (clientId, nationality) VALUES (?, ?)")) {
+                statement1.setInt(1, obj.getIdClient());
+                statement1.setString(2, nationality);
+                statement1.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (String city : obj.getLivingCities()) {
+            try (Connection connection1 = connectionPool.getConnection();
+                 PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.city_living (clientId, city_name) VALUES (?, ?)")) {
+                statement1.setInt(1, obj.getIdClient());
+                statement1.setString(2, city);
+                statement1.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void delete(Integer key) {
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM bank_app.client WHERE bank_app.client.idclient = ?")) {
+             PreparedStatement statement = connection.prepareStatement("DELETE FROM bank_app.client WHERE bank_app.client.idclient = ?")) {
             statement.setInt(1, key);
             statement.execute();
         } catch (SQLException e) {
@@ -298,10 +411,10 @@ public class ClientDao implements GenericDao<Integer, Client> {
     public void create(Client obj) {
         int clientId = -1;
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
-        try(Connection connection = connectionPool.getConnection();
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO bank_app.client " +
-                "(secname, name, surname, birthday, sex, passportSeries, passportNumber, passportPlace, passportDate, passportId, birthPlace, address, homePhone, phone, `e-mail`, pensioner, income, military) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = connectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement("INSERT INTO bank_app.client " +
+                     "(secname, name, surname, birthday, sex, passportSeries, passportNumber, passportPlace, passportDate, passportId, birthPlace, address, homePhone, phone, `e-mail`, pensioner, income, military) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, obj.getSecName());
             statement.setString(2, obj.getName());
             statement.setString(3, obj.getSurName());
@@ -330,7 +443,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
 
             for (String familyMember : obj.getFamilyMembers()) {
                 try (Connection connection1 = connectionPool.getConnection();
-                    PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.family_stat (clientId, family_member) VALUES (?, ?)")) {
+                     PreparedStatement statement1 = connection1.prepareStatement("INSERT INTO bank_app.family_stat (clientId, family_member) VALUES (?, ?)")) {
                     statement1.setInt(1, clientId);
                     statement1.setString(2, familyMember);
                     statement1.execute();
@@ -373,7 +486,7 @@ public class ClientDao implements GenericDao<Integer, Client> {
         List<Client> clients = new ArrayList<>();
         IConnectionPool connectionPool = ConnectionPoolImpl.getInstance();
         try (Connection connection = connectionPool.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from bank_app.client")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM bank_app.client")) {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {

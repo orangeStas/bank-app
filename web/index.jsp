@@ -44,8 +44,7 @@
 
 
         //<![CDATA[
-        $(window).load(function () {<!--   w  w  w . j  a v a2  s. co m-->
-//save the selector so you don't have to do the lookup everytime
+        $(window).load(function () {
             $dropdown = $("#contextMenu");
             $(".actionButton").click(function () {
                 //get row ID
@@ -56,6 +55,8 @@
                 $dropdown.find(".openLink").attr("href", "/controller?command=getClient&passportNumber=" + id);
                 $dropdown.find(".removeLink").attr("href", "/controller?command=removeClient&passportNumber=" + id);
                 $dropdown.find(".editLink").attr("href", "/controller?command=openForEdit&passportNumber=" + id);
+                $dropdown.find(".depositLink").attr("href", "/controller?command=chooseUserForDeposit&passportNumber=" + id);
+                $dropdown.find(".creditLink").attr("href", "/controller?command=chooseUserForCredit&passportNumber=" + id);
                 //show dropdown
                 $(this).dropdown();
             });
@@ -66,6 +67,11 @@
 </head>
 <body>
 <div class="container">
+
+    <form action="bankomat_login.jsp">
+        <button type="submit" class="btn btn-primary btn-lg btn-block">БАНКОМАТ</button>
+    </form>
+
     <h2 class="text-center">Подсистема ввода и модификации данных о клиентах условного коммерческого учреждения </h2>
     <div class="panel-group">
 
@@ -95,10 +101,15 @@
                                             <p class="text-danger">Пользвователь с таким именем уже существует</p>
                                         </c:when>
                                         <c:when test="${param['message'] == 'passportNoMatch'}">
-                                            <p class="text-danger">Пользователь с таким номером паспорта уже существует</p>
+                                            <p class="text-danger">Пользователь с таким номером паспорта уже
+                                                существует</p>
                                         </c:when>
                                         <c:when test="${param['message'] == 'passpordIdMatch'}">
-                                            <p class="text-danger">Пользователь с таким идентификационным номером паспорта уже существует</p>
+                                            <p class="text-danger">Пользователь с таким идентификационным номером
+                                                паспорта уже существует</p>
+                                        </c:when>
+                                        <c:when test="${param['message'] == 'invalidData'}">
+                                            <p class="text-danger">Введены некорректные данные</p>
                                         </c:when>
                                     </c:choose>
 
@@ -113,7 +124,8 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-2" for="firstName">* Фамилия:</label>
                                         <div class="col-sm-10">
-                                            <input required type="text" maxlength="45" class="form-control" name="firstName"
+                                            <input required type="text" maxlength="45" class="form-control"
+                                                   name="firstName"
                                                    pattern="^[A-Za-zА-Яа-яЁё]+$"
                                                    id="firstName" placeholder="Введите фамилию"
                                                    value="${client.secName}">
@@ -181,7 +193,8 @@
                                         <label class="control-label col-sm-2" for="passportSeries">* Серия
                                             паспорта:</label>
                                         <div class="col-sm-10">
-                                            <input type="text" required maxlength="2" class="form-control" name="passportSeries"
+                                            <input type="text" required maxlength="2" class="form-control"
+                                                   name="passportSeries"
                                                    id="passportSeries" value="${client.passportSeries}"
                                                    placeholder="Введите серию паспорта (2 буквы)">
                                         </div>
@@ -201,7 +214,8 @@
                                     <div class="form-group">
                                         <label class="control-label col-sm-2" for="passportPlace">* Кем выдан:</label>
                                         <div class="col-sm-10">
-                                            <input type="text" required maxlength="150" class="form-control" name="passportPlace"
+                                            <input type="text" required maxlength="150" class="form-control"
+                                                   name="passportPlace"
                                                    id="passportPlace"
                                                    value="${client.passportPlace}"
                                                    placeholder="Укажите, каким учреждением был выдан паспорт">
@@ -232,7 +246,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="control-label col-sm-2"  for="birthPlace">* Место рождения:</label>
+                                        <label class="control-label col-sm-2" for="birthPlace">* Место рождения:</label>
                                         <div class="col-sm-10">
                                             <input type="text" required maxlength="150" class="form-control"
                                                    value="${cleint.birthPlace}"
@@ -473,7 +487,281 @@
                     <li><a tabindex="-1" href="#" class="openLink">Открыть</a></li>
                     <li><a tabindex="-1" href="#" class="editLink">Изменить</a></li>
                     <li><a tabindex="-1" href="#" class="removeLink">Удалить</a></li>
+                    <li><a tabindex="-1" href="#" class="depositLink">Заключить депозитный договор</a></li>
+                    <li><a tabindex="-1" href="#" class="creditLink">Заключить кредитный договор</a></li>
                 </ul>
+            </div>
+        </div>
+
+        <div class="panel panel-info">
+            <div class="panel-heading">Модуль «Депозитные операции с физическими лицами».</div>
+            <div class="panel-body">
+
+                <h3 class="text-center">Депозитные программы</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Описание</th>
+                        <th>Процентная ставка (%)</th>
+                        <th>Валюта</th>
+                        <th>Тип</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <c:forEach var="deposit" items="${deposits}">
+                        <tr>
+                            <td>${deposit.name}</td>
+                            <td>${deposit.percent}</td>
+                            <td>${deposit.currency}</td>
+
+                            <c:choose>
+                                <c:when test="${deposit.type.name eq 'REVOCABLE'}">
+                                    <td>Отзывный</td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>Безотзывный</td>
+                                </c:otherwise>
+                            </c:choose>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+
+                <h3 class="text-center">Клиентские счета</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Номер счёта</th>
+                        <th>ФИО клиента</th>
+                        <th>Тип депозита</th>
+                        <th>Дата начала - Дата окончания</th>
+                        <th>Количество средств на счету</th>
+                        <th>Операция</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <c:forEach var="bill" items="${bills}">
+                        <tr>
+                            <td>${bill.activeBill.number}</td>
+                            <td>${bill.activeBill.creator.secName} ${bill.activeBill.creator.name} ${bill.activeBill.creator.surName}</td>
+
+                            <c:choose>
+                                <c:when test="${bill.activeBill.deposit.type.name eq 'REVOCABLE'}">
+                                    <td>${bill.activeBill.deposit.currency} | Отзывный
+                                        | ${bill.activeBill.deposit.percent}%
+                                    </td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>${bill.activeBill.deposit.currency} | Безотзывный
+                                        | ${bill.activeBill.deposit.percent}%
+                                    </td>
+                                </c:otherwise>
+                            </c:choose>
+                            <td>${bill.activeBill.startDate} - ${bill.activeBill.endDate}</td>
+                            <td>${bill.activeBill.moneySum}</td>
+
+                            <jsp:useBean id="today" class="java.util.Date"/>
+
+                            <c:choose>
+                                <c:when test="${bill.activeBill.deposit.type.name eq 'REVOCABLE'}">
+                                    <td>
+                                        <a href="/controller?command=revokeBill&billActiveId=${bill.activeBill.id}&billPassiveId=${bill.passiveBill.id}"
+                                           class="btn btn-primary" role="button">
+                                            Отозвать
+                                        </a>
+                                    </td>
+                                </c:when>
+                                <c:when test="${(bill.activeBill.deposit.type.name ne 'REVOCABLE') && (today.time gt bill.activeBill.endDate.time)}">
+                                    <td>
+                                        <a href="/controller?command=revokeBill&billActiveId=${bill.activeBill.id}&billPassiveId=${bill.passiveBill.id}"
+                                           class="btn btn-primary" role="button">
+                                            Отозвать
+                                        </a>
+                                    </td>
+                                </c:when>
+                            </c:choose>
+                        </tr>
+
+                        <tr>
+                            <td>${bill.passiveBill.number}</td>
+                            <td>${bill.passiveBill.creator.secName} ${bill.passiveBill.creator.name} ${bill.passiveBill.creator.surName}</td>
+
+                            <c:choose>
+                                <c:when test="${bill.passiveBill.deposit.type.name eq 'REVOCABLE'}">
+                                    <td>${bill.passiveBill.deposit.currency} | Отзывный
+                                        | ${bill.passiveBill.deposit.percent}%
+                                    </td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>${bill.passiveBill.deposit.currency} | Безотзывный
+                                        | ${bill.passiveBill.deposit.percent}%
+                                    </td>
+                                </c:otherwise>
+                            </c:choose>
+                            <td>${bill.passiveBill.startDate} - ${bill.passiveBill.endDate}</td>
+                            <td>${bill.passiveBill.moneySum}</td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+
+                <h3 class="text-center">Счета фонда развития банка</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <th>Счёт</th>
+                    <th>Валюта</th>
+                    <th>Количество средств</th>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="bankBill" items="${bankBills}">
+                        <tr>
+                            <td>${bankBill.name}</td>
+                            <td>${bankBill.currency}</td>
+                            <td>${bankBill.moneyAmount}</td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+                <form action="/controller" method="get">
+                    <input type="hidden" name="command" value="endBankDay">
+                    <button type="submit" class="btn btn-primary">Закрытие банковского дня</button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="panel panel-info">
+            <div class="panel-heading">Модуль «Кредитные операции с физическими лицами».</div>
+            <div class="panel-body">
+
+                <h3 class="text-center">Кредитные программы</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Описание</th>
+                        <th>Процентная ставка (%)</th>
+                        <th>Валюта</th>
+                        <th>Тип</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <c:forEach var="credit" items="${credits}">
+                        <tr>
+                            <td>${credit.name}</td>
+                            <td>${credit.percent}</td>
+                            <td>${credit.currency}</td>
+
+                            <c:choose>
+                                <c:when test="${credit.type.name eq 'MONTHLY'}">
+                                    <td>Ежемесячный</td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>Аннуитетный</td>
+                                </c:otherwise>
+                            </c:choose>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+
+                <h3 class="text-center">Клиентские счета</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Номер счёта</th>
+                        <th>ФИО клиента</th>
+                        <th>Тип кредита</th>
+                        <th>Дата начала - Дата окончания</th>
+                        <th>Количество средств на счету</th>
+                        <th>Операция</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <c:forEach var="creditBill" items="${creditBills}">
+                        <tr>
+                            <td>${creditBill.activeBill.number}</td>
+                            <td>${creditBill.activeBill.creator.secName} ${creditBill.activeBill.creator.name} ${creditBill.activeBill.creator.surName}</td>
+
+                            <c:choose>
+                                <c:when test="${creditBill.activeBill.credit.type.name eq 'MONTHLY'}">
+                                    <td>${creditBill.activeBill.credit.currency} | Ежемесячный
+                                        | ${creditBill.activeBill.credit.percent}%
+                                    </td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>${creditBill.activeBill.credit.currency} | Аннуитетный
+                                        | ${creditBill.activeBill.credit.percent}%
+                                    </td>
+                                </c:otherwise>
+                            </c:choose>
+                            <td>${creditBill.activeBill.startDate} - ${creditBill.activeBill.endDate}</td>
+                            <td>${creditBill.activeBill.moneySum}</td>
+
+                            <c:choose>
+                                <c:when test="${creditBill.canToClose}">
+                                    <td>
+                                        <a href="/controller?command=closeCreditBill&creditBillActiveId=${creditBill.activeBill.id}&creditBillPassiveId=${creditBill.passiveBill.id}"
+                                           class="btn btn-primary" role="button">
+                                            Закрыть кредит
+                                        </a>
+                                    </td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>
+                                        <a href="/controller?command=creditEndPeriod&creditBillActiveId=${creditBill.activeBill.id}&creditBillPassiveId=${creditBill.passiveBill.id}"
+                                           class="btn btn-primary" role="button">
+                                            Закрыть кредитный период(месяц)
+                                        </a>
+                                    </td>
+                                </c:otherwise>
+                            </c:choose>
+
+                        </tr>
+
+                        <tr>
+                            <td>${creditBill.passiveBill.number}</td>
+                            <td>${creditBill.passiveBill.creator.secName} ${creditBill.passiveBill.creator.name} ${creditBill.passiveBill.creator.surName}</td>
+
+                            <c:choose>
+                                <c:when test="${creditBill.passiveBill.credit.type.name eq 'MONTHLY'}">
+                                    <td>${creditBill.passiveBill.credit.currency} | Ежемесячный
+                                        | ${creditBill.passiveBill.credit.percent}%
+                                    </td>
+                                </c:when>
+                                <c:otherwise>
+                                    <td>${creditBill.passiveBill.credit.currency} | Аннуитетный
+                                        | ${creditBill.passiveBill.credit.percent}%
+                                    </td>
+                                </c:otherwise>
+                            </c:choose>
+                            <td>${creditBill.passiveBill.startDate} - ${creditBill.passiveBill.endDate}</td>
+                            <td>${creditBill.passiveBill.moneySum}</td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+
+                <h3 class="text-center">Счета фонда развития банка</h3>
+                <table class="table table-hover">
+                    <thead>
+                    <th>Счёт</th>
+                    <th>Валюта</th>
+                    <th>Количество средств</th>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="bankBill" items="${bankBills}">
+                        <tr>
+                            <td>${bankBill.name}</td>
+                            <td>${bankBill.currency}</td>
+                            <td>${bankBill.moneyAmount}</td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
